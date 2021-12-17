@@ -1,10 +1,20 @@
 const grid=document.querySelector('.grid')
 
+const boardWidth=640
+const boardHeight=300
+const ballDiameter=20
 const blockWidth=100
 const blockHeight=20
 
 const userStart=[285,5]
 let currentPosition=userStart
+
+const ballStart=[325,40]
+let ballCurrentPosition=ballStart
+
+let timerId
+let xDirection=2
+let yDirection=2
 
 //create block 
 class Block{
@@ -53,6 +63,11 @@ const drawUserBlock=()=>{
     userBlock.style.bottom=currentPosition[1]+'px'
 }
 
+const drawBall=()=>{
+    ball.style.left=ballCurrentPosition[0]+'px'
+    ball.style.bottom=ballCurrentPosition[1]+'px'
+}
+
 
 //move user block
 const moveUserBlock=(event)=>{
@@ -74,13 +89,57 @@ const moveUserBlock=(event)=>{
     }
 }
 
+const moveBall=()=>{
+    ballCurrentPosition[0]+=xDirection
+    ballCurrentPosition[1]+=yDirection
+    drawBall()
+    checkForCollisions()
+}
+
+timerId=setInterval(moveBall,15)
+
+//change direction of the ball
+const changeDirection=()=>{
+    if(xDirection===2&&yDirection===2){
+        yDirection=-2
+        return
+    }
+    if(xDirection===2 && yDirection ===-2){
+        xDirection=-2
+        return
+    }
+    if(xDirection===-2&&yDirection===-2){
+        yDirection=2
+        return
+    }
+    if(xDirection===-2 && yDirection===2){
+        xDirection=2
+        return
+    }
+}
+
 document.addEventListener('keydown',(event)=>{
     console.log(event)
     moveUserBlock(event)
 })
 
+//check the collision logic
+const checkForCollisions=()=>{
+    if((ballCurrentPosition[0]>=(boardWidth-ballDiameter))||(ballCurrentPosition[1]>=(boardHeight-ballDiameter))||
+    (ballCurrentPosition[1]<=0)){
+        changeDirection()
+    }
+
+    //checkfor game over
+    if(ballCurrentPosition[1]<=0){
+        clearInterval(timerId)
+        document.removeEventListener('keydown', moveUserBlock)
+    }
+}
 
 //create a ball
 const ball=document.createElement('div')
 ball.classList.add('ball')
+ball.style.left=ballCurrentPosition[0]+'px'
+ball.style.bottom=ballCurrentPosition[1]+'px'
 grid.appendChild(ball)
